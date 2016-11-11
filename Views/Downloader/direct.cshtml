@@ -1,0 +1,24 @@
+﻿@model System.Collections.Generic.IEnumerable<WebApplication.Controllers.DownFiles>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <td>File</td>
+            <td>Upload date</td>
+            <td>Size</td>
+         </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td><a href="~/tfs/@item.Name">@item.Name</a></td>
+                <td>@item.DownloadDate</td>
+                <td> @item.Size</td>
+                 
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="alert alert-danger">
+    @ViewBag.LastError
+</div>

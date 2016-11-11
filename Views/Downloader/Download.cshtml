@@ -1,0 +1,39 @@
+﻿@model WebApplication.Controllers.DownFiles
+<hr />
+@using (Html.BeginForm())
+{
+    <div class="form-horizontal">
+        @Html.AntiForgeryToken()
+
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(m => m.Url, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Url, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Url, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Name, new {@class = "col-md-2 control-label"})
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Name, new {@class = "form-control"})
+                @Html.ValidationMessageFor(m => m.Name, "", new {@class = "text-danger"})
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Cookiee, new { @class = "col-md-2 control-label" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Cookiee, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Cookiee, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-default">Telecharger</button>
+            </div>
+        </div>
+    </div>
+}
