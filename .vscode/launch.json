@@ -1,16 +1,25 @@
 {
     "version": "0.2.0",
-    "configurations": [
+    "configurations": [{
+            "name": ".NET Core Launch (console)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/bin/Debug/netcoreapp1.0/postgressampleapp.dll",
+            "args": ["http://0.0.0.0:8080"],
+            "cwd": "${workspaceRoot}",
+            "stopAtEntry": false,
+            "externalConsole": false
+        },
         {
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceRoot}\\bin\\Debug\\netcoreapp1.0\\asp-net-downloader.dll",
-            "args": [],
+            "program": "${workspaceRoot}/bin/Debug/netcoreapp1.0/postgressampleapp.dll",
+            "args": ["http://0.0.0.0:8080"],
             "cwd": "${workspaceRoot}",
             "stopAtEntry": false,
-            "internalConsoleOptions": "openOnSessionStart",
             "launchBrowser": {
                 "enabled": true,
                 "args": "${auto-detect-url}",

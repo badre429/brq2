@@ -119,7 +119,7 @@ namespace WebApplication.Controllers
                 ViewBag.LastError = LastError;
 
                 currentFiles = currentFiles.Where(o => o.Progress < 100).ToList();
-                var sm = _env.WebRootPath + "/tfs";
+                var sm = _env.WebRootPath + "/tfs/";
                 var di = new System.IO.DirectoryInfo(sm);
                 
                 var list =

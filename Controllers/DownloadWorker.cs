@@ -13,11 +13,16 @@ namespace WebApplication.Controllers
     public class DownloadWorker
     {
 
-        public async Task DownloadFileAsync(CancellationToken token)
+        public async Task DownloadFileAsync( )
         {
+            var cancellationToken = new CancellationTokenSource();var token =cancellationToken.Token;
             var client = new HttpClient();
             var handler = new HttpClientHandler();
+            if (!string.IsNullOrWhiteSpace(this.cookie))
+            {
 
+                client.DefaultRequestHeaders.Add("Cookie", this.cookie);
+            }
             var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, token);
 
             if (!response.IsSuccessStatusCode)
@@ -90,7 +95,7 @@ namespace WebApplication.Controllers
             // var sm = Server.MapPath("~/tfs");
             try
             {
-                HttpClient webClient = new HttpClient();
+                 
                 var uri = new Uri(url);
                 if (string.IsNullOrWhiteSpace(filename))
                 {
@@ -101,15 +106,11 @@ namespace WebApplication.Controllers
                         filename = filename.Substring(i + 1);
                     }
                 }
-                if (!string.IsNullOrWhiteSpace(this.cookie))
-                {
-                    webClient.DefaultRequestHeaders.TryAddWithoutValidation("cookie",this.cookie);
-                }
-
-                var cancellationToken = new CancellationTokenSource();
+               
+                
                 DownloaderController.currentFiles.Add(new DownFiles() { Name = filename, Url = url, lastDate = DateTime.Now });
 
-                await DownloadFileAsync(cancellationToken.Token);
+                await DownloadFileAsync();
                 /*  webClient.reque += new AsyncCompletedEventHandler(Completed);
                   webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
                   webClient.DownloadFileAsync(uri, sm + "\\" + filename);*/
@@ -117,7 +118,7 @@ namespace WebApplication.Controllers
             catch (Exception ex)
             {
                 DownloaderController.LastError = ex.Message;
-                 this.Completed();
+                this.Completed();
             }
 
         }
@@ -140,7 +141,7 @@ namespace WebApplication.Controllers
         private void Completed(Exception e = null)
         {
             var x = DownloaderController.currentFiles.FirstOrDefault(o => o.Name.ToLower() == filename.ToLower());
-           
+
             if (e != null)
             {
 
@@ -153,7 +154,7 @@ namespace WebApplication.Controllers
             }
             if (x != null)
             {
-                
+
                 x.Progress = 100;
                 DownloaderController.currentFiles.Remove(x);
             };

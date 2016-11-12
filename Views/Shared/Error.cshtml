@@ -1,11 +1,7 @@
 @{
     ViewData["Title"] = "Error";
 }
-@if(!string.IsNullOrWhiteSpace(WebApplication.Controllers.DownloaderController.LastError)){
-<div class="alert alert-danger">
-    @WebApplication.Controllers.DownloaderController.LastError
-</div>
-}
+
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
 
