@@ -113,7 +113,7 @@ namespace WebApplication.Controllers
                 await DownloadFileAsync();
                 /*  webClient.reque += new AsyncCompletedEventHandler(Completed);
                   webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(ProgressChanged);
-                  webClient.DownloadFileAsync(uri, sm + "\\" + filename);*/
+                  webClient.DownloadFileAsync(uri, sm + "/" + filename);*/
             }
             catch (Exception ex)
             {
@@ -146,9 +146,9 @@ namespace WebApplication.Controllers
             {
 
                 DownloaderController.LastError = e.Message;
-                if (System.IO.File.Exists(sm + "\\" + filename))
+                if (System.IO.File.Exists(sm + "/" + filename))
                 {
-                    System.IO.File.Delete(sm + "\\" + filename);
+                    System.IO.File.Delete(sm + "/" + filename);
                 }
 
             }
