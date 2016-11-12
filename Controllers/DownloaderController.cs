@@ -83,14 +83,14 @@ namespace WebApplication.Controllers
                 
                 var di = new System.IO.DirectoryInfo(sm);
                 var list =
-                    Directory.EnumerateFiles(sm,"*.*",SearchOption.TopDirectoryOnly ).Select(o=>new FileInfo(o)).Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
+                    Directory.EnumerateFiles(sm,"*.*",SearchOption.TopDirectoryOnly ).Select(o=>new {info=new FileInfo(o),Name=o}).Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
                         .Select(
                             o =>
                                 new DownFiles()
                                 {
                                     Name = o.Name,
-                                    Size = Convert.ToDouble(o.Length).Bytes().Humanize(".00"),
-                                    DownloadDate = o.CreationTimeUtc
+                                    Size = Convert.ToDouble(o.info.Length).Bytes().Humanize(".00"),
+                                    DownloadDate = o.info.CreationTimeUtc
                                 }).OrderByDescending(o => o.DownloadDate);
                 var ret = list.Where(o => o.DownloadDate > DateTime.Now.AddDays(-8)).ToList();
 
