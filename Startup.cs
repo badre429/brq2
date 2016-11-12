@@ -63,16 +63,16 @@ namespace WebApplication
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            //if (env.IsDevelopment())
-            //{
-            app.UseDeveloperExceptionPage();
-            app.UseDatabaseErrorPage();
-            app.UseBrowserLink();
-            //}
-            //else
-            //{
-            //    app.UseExceptionHandler("/Home/Error");
-            //}
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+                app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
 
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -80,13 +80,13 @@ namespace WebApplication
                 DefaultContentType = "application/*"
             });
 
-            app.UseFileServer(enableDirectoryBrowsing: true);
-            // app.UseDirectoryBrowser(new DirectoryBrowserOptions()
-            // {
-            //     FileProvider = new PhysicalFileProvider(
-            // Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\tfs")),
-            //     RequestPath = new PathString("/tfs")
-            // });
+         //   app.UseFileServer(enableDirectoryBrowsing: true);
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions()
+            {
+                FileProvider = new PhysicalFileProvider(
+                Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\tfs")),
+                RequestPath = new PathString("/tfs")
+            });
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
