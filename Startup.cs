@@ -74,11 +74,11 @@ namespace WebApplication
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            // app.UseStaticFiles(new StaticFileOptions
-            // {
-            //     ServeUnknownFileTypes = true,
-            //     DefaultContentType = "application/*"
-            // });
+             app.UseStaticFiles(new StaticFileOptions
+             {
+                 ServeUnknownFileTypes = true,
+                DefaultContentType = "application/*"
+            });
 
          //   app.UseFileServer(enableDirectoryBrowsing: true);
             // app.UseDirectoryBrowser(new DirectoryBrowserOptions()
