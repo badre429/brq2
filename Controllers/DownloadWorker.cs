@@ -117,6 +117,7 @@ namespace WebApplication.Controllers
             catch (Exception ex)
             {
                 DownloaderController.LastError = ex.Message;
+                 this.Completed();
             }
 
         }

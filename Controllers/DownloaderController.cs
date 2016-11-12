@@ -14,6 +14,7 @@ namespace WebApplication.Controllers
         private IHostingEnvironment _env;
         public DownloaderController(IHostingEnvironment env)
         {
+            
             _env = env;
         }
         public static string LastError { get; set; }
