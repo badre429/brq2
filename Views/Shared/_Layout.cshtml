@@ -41,8 +41,19 @@
         </div>
     </div>
     <div class="container body-content">
+        <hr />
         @RenderBody()
         <hr />
+@if(!string.IsNullOrWhiteSpace(WebApplication.Controllers.DownloaderController.LastUrl)){
+<div class="alert alert-info">
+    @WebApplication.Controllers.DownloaderController.LastUrl
+</div>
+}
+@if(!string.IsNullOrWhiteSpace(WebApplication.Controllers.DownloaderController.LastError)){
+<div class="alert alert-danger">
+    @WebApplication.Controllers.DownloaderController.LastError
+</div>
+}
         <footer>
             <p>&copy; 2016 - WebApplication</p>
         </footer>
