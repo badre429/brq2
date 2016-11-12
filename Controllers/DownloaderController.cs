@@ -121,8 +121,9 @@ namespace WebApplication.Controllers
                 currentFiles = currentFiles.Where(o => o.Progress < 100).ToList();
                 var sm = _env.WebRootPath + "/tfs";
                 var di = new System.IO.DirectoryInfo(sm);
+                
                 var list =
-                    di.EnumerateFiles().Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
+                    di.EnumerateFiles("*", SearchOption.AllDirectories).Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
                         .Select(
                             o =>
                                 new DownFiles()
