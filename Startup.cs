@@ -74,19 +74,19 @@ namespace WebApplication
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseStaticFiles(new StaticFileOptions
-            {
-                ServeUnknownFileTypes = true,
-                DefaultContentType = "application/*"
-            });
+            // app.UseStaticFiles(new StaticFileOptions
+            // {
+            //     ServeUnknownFileTypes = true,
+            //     DefaultContentType = "application/*"
+            // });
 
          //   app.UseFileServer(enableDirectoryBrowsing: true);
-            app.UseDirectoryBrowser(new DirectoryBrowserOptions()
-            {
-                FileProvider = new PhysicalFileProvider(
-                Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\tfs")),
-                RequestPath = new PathString("/tfs")
-            });
+            // app.UseDirectoryBrowser(new DirectoryBrowserOptions()
+            // {
+            //     FileProvider = new PhysicalFileProvider(
+            //     Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\tfs")),
+            //     RequestPath = new PathString("/tfs")
+            // });
             app.UseIdentity();
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
