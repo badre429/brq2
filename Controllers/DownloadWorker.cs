@@ -101,7 +101,10 @@ namespace WebApplication.Controllers
                         filename = filename.Substring(i + 1);
                     }
                 }
-
+                if (!string.IsNullOrWhiteSpace(this.cookie))
+                {
+                    webClient.DefaultRequestHeaders.TryAddWithoutValidation("cookie",this.cookie);
+                }
 
                 var cancellationToken = new CancellationTokenSource();
                 DownloaderController.currentFiles.Add(new DownFiles() { Name = filename, Url = url, lastDate = DateTime.Now });

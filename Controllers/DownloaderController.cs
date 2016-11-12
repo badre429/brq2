@@ -24,7 +24,7 @@ namespace WebApplication.Controllers
         {
             try
             {
-                var sm = _env.WebRootPath + "/tfs";
+                var sm = _env.WebRootPath + "\\tfs";
                 if (System.IO.File.Exists(sm + "\\" + filename))
                 {
                     System.IO.File.Delete(sm + "\\" + filename);
@@ -49,7 +49,7 @@ namespace WebApplication.Controllers
         {
             try
             {
-                var sm = _env.WebRootPath + "/tfs";
+                var sm = _env.WebRootPath + "\\tfs";
                 if (System.IO.File.Exists(sm + "\\" + filename))
                 {
                     System.IO.File.Delete(sm + "\\" + filename);
@@ -77,7 +77,8 @@ namespace WebApplication.Controllers
                 ViewBag.LastError = LastError;
 
                 currentFiles = currentFiles.Where(o => o.Progress < 100).ToList();
-                var sm = _env.WebRootPath + "/tfs";
+                var sm = _env.WebRootPath + "\\tfs\\";
+                ViewBag.Path=sm;
                 var di = new System.IO.DirectoryInfo(sm);
                 var list =
                     di.EnumerateFiles().Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
@@ -117,7 +118,7 @@ namespace WebApplication.Controllers
                 ViewBag.LastError = LastError;
 
                 currentFiles = currentFiles.Where(o => o.Progress < 100).ToList();
-                var sm = _env.WebRootPath + "/tfs";
+                var sm = _env.WebRootPath + "\\tfs";
                 var di = new System.IO.DirectoryInfo(sm);
                 var list =
                     di.EnumerateFiles().Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
@@ -174,9 +175,9 @@ namespace WebApplication.Controllers
                     string cname = null;
                     if (i < allnames.Count()) cname = allnames[i].Trim();
                     LastUrl+=" "+cname+" "+allurls[i].Trim();
-                    var x = new DownloadWorker(allurls[i].Trim(), cname, _env.WebRootPath + "/tfs", model.Cookiee);
+                    var x = new DownloadWorker(allurls[i].Trim(), cname, _env.WebRootPath + "\\tfs", model.Cookiee);
                 }
-                // var x = new DownloadWorker(model.Url,  model.Name, _env.WebRootPath+"/tfs",model.Cookiee);
+                // var x = new DownloadWorker(model.Url,  model.Name, _env.WebRootPath+"\\tfs",model.Cookiee);
                 return RedirectToAction("Progress");
             }
             catch (Exception ex)
@@ -204,7 +205,7 @@ namespace WebApplication.Controllers
                     return View(model);
                 }
 
-                var x = new DownloadWorker(model.Url, model.Name, _env.WebRootPath + "/tfs", model.Cookiee);
+                var x = new DownloadWorker(model.Url, model.Name, _env.WebRootPath + "\\tfs", model.Cookiee);
                 return RedirectToAction("Progress");
             }
             catch (Exception ex)
