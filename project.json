@@ -2,7 +2,7 @@
     "userSecretsId": "aspnet-WebApplication-0799fe3e-6eaf-4c5f-b40e-7c6bfd5dfa9a",
     "dependencies": {
         "Microsoft.NETCore.App": {
-             "version": "1.0.0",
+            "version": "1.0.0",
             "type": "platform"
         },
         "Microsoft.AspNetCore.Authentication.Cookies": "1.0.0",
@@ -79,6 +79,7 @@
         }
     },
     "buildOptions": {
+        "outputName": "postgressampleapp",
         "debugType": "portable",
         "emitEntryPoint": true,
         "preserveCompilationContext": true
@@ -104,7 +105,7 @@
             // "gulp min"
         ],
         "postpublish": [
-            "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%"
+            // "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%"
         ]
     },
     "tooling": {
