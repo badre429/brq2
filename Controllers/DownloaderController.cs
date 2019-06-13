@@ -11,10 +11,10 @@ namespace WebApplication.Controllers
 {
     public class DownloaderController : Controller
     {
-        private IHostingEnvironment _env;
-        public DownloaderController(IHostingEnvironment env)
+        private IWebHostEnvironment _env;
+        public DownloaderController(IWebHostEnvironment env)
         {
-            
+
             _env = env;
         }
         public static string LastError { get; set; }
@@ -79,11 +79,11 @@ namespace WebApplication.Controllers
 
                 currentFiles = currentFiles.Where(o => o.Progress < 100).ToList();
                 var sm = _env.WebRootPath + "/tfs/";
-                ViewBag.Path=sm;
-                
+                ViewBag.Path = sm;
+
                 var di = new System.IO.DirectoryInfo(sm);
                 var list =
-                    Directory.EnumerateFiles(sm,"*.*",SearchOption.TopDirectoryOnly ).Select(o=>new {info=new FileInfo(o),Name=o}).Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
+                    Directory.EnumerateFiles(sm, "*.*", SearchOption.TopDirectoryOnly).Select(o => new { info = new FileInfo(o), Name = o }).Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
                         .Select(
                             o =>
                                 new DownFiles()
@@ -120,9 +120,9 @@ namespace WebApplication.Controllers
                 ViewBag.LastError = LastError;
 
                 currentFiles = currentFiles.Where(o => o.Progress < 100).ToList();
-                var sm = _env.WebRootPath + "/tfs/";
+                var sm =Path.Join( _env.WebRootPath ,"tfs");
                 var di = new System.IO.DirectoryInfo(sm);
-                
+
                 var list =
                     di.EnumerateFiles().Where(o => !currentFiles.Any(fl => fl.Name.ToLower() == o.Name.ToLower()))
                         .Select(
@@ -151,6 +151,7 @@ namespace WebApplication.Controllers
 
                 DownloaderController.LastError = DateTime.Now.ToString() + " :" + ex.Message;
                 LastError = ex.Message;
+                System.Console.WriteLine(ex.Message);
                 return View("Error");
             }
         }
@@ -168,7 +169,7 @@ namespace WebApplication.Controllers
                 {
                     return View(model);
                 }
-                LastUrl = model.Url +" "+ model.Name;
+                LastUrl = model.Url + " " + model.Name;
 
                 if (model.Name == null) model.Name = "";
                 var allurls = model.Url.Split('\n').ToList();
@@ -177,7 +178,7 @@ namespace WebApplication.Controllers
                 {
                     string cname = null;
                     if (i < allnames.Count()) cname = allnames[i].Trim();
-                    LastUrl+=" "+cname+" "+allurls[i].Trim();
+                    LastUrl += " " + cname + " " + allurls[i].Trim();
                     var x = new DownloadWorker(allurls[i].Trim(), cname, _env.WebRootPath + "/tfs", model.Cookiee);
                 }
                 // var x = new DownloadWorker(model.Url,  model.Name, _env.WebRootPath+"/tfs",model.Cookiee);
@@ -221,7 +222,7 @@ namespace WebApplication.Controllers
         }
         public ActionResult Progress()
         {
-            
+
             var all = currentFiles;
             ViewBag.LastUrl = LastUrl;
             return View(all.ToList());
