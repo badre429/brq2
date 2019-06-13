@@ -73,7 +73,7 @@ namespace GeoMapDownloader
             CreateProvider("Google Terrain Only", "https://www.google.com/maps/vt?lyrs=t@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1500);
             CreateProvider("Google Satellite Only", "https://www.google.com/maps/vt?lyrs=s@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1600);
             CreateProvider("Google Hybrid", "https://www.google.com/maps/vt?lyrs=y@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1700);
-            TileProvider tileProvider = CreateProvider("Mapbox", " https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7/{zoom}/{x}/{y}.vector.pbf?access_token={ApiKey}", 1800, "vector", "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA");
+            TileProvider tileProvider = CreateProvider("Mapbox", " https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7/{zoom}/{x}/{y}.vector.pbf?access_token={ApiKey}", 1800, "vector", "pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p0MG01MXRqMW45cjQzb2R6b2ptc3J4MSJ9.zA2W0IkI0c6KaAhJfk9bWg");
             tileProvider.Layers.Add(new TileLayer
             {
                 FormatUrl = "",
@@ -91,7 +91,7 @@ namespace GeoMapDownloader
             CreateProvider("Esri Imagery/Satellite", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{zoom}/{y}/{x}", 2400);
             CreateProvider("Yandex Imagery/Satellite", "http://sat04.maps.yandex.net/tiles?l=sat&x={x}&y={y}&z={zoom}", 2500);
             CreateProvider("BING Imagery/Satellite", "http://ecn.t3.tiles.virtualearth.net/tiles/a{q}.jpeg?g=0&dir=dir_n", 2600);
-            CreateProvider("MAPBOX Imagery/Satellite", "https://api.mapbox.com/v4/mapbox.satellite/{zoom}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA", 3700);
+            CreateProvider("MAPBOX Imagery/Satellite", "https://api.mapbox.com/v4/mapbox.satellite/{zoom}/{x}/{y}.png?access_token=pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p0MG01MXRqMW45cjQzb2R6b2ptc3J4MSJ9.zA2W0IkI0c6KaAhJfk9bWg", 3700);
 
 
 
@@ -408,10 +408,10 @@ namespace GeoMapDownloader
                      try
                      {
                          int itemCount = Math.Min(SaveStack.Count, maxItemCount);
-                         if (itemCount > 1)
-                         {
-                             System.Console.WriteLine($"save tiles:{itemCount}");
-                         }
+                        //  if (itemCount > 1)
+                        //  {
+                        //      System.Console.WriteLine($"save tiles:{itemCount}");
+                        //  }
                          var db = new TilesDbContext();
                          SaveItem[] arr = new SaveItem[itemCount];
                          if (SaveStack.TryPopRange(arr) > 0)

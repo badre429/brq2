@@ -15,10 +15,10 @@ function getStatus() {
   if (rect.serverDownloading) {
     fetch('/api/Tile/DownloadState').then(e =>
       e.json().then(json => {
-        // console.log(json);
+        console.log(json);
         vueApp.serverStat = json;
         vueApp.serverDownloading = true;
-        rect.serverDownloading = json.ù;
+        rect.serverDownloading = json.isActive;
         vueApp.serverDownloading = json.isActive;
       })
     );
@@ -128,7 +128,7 @@ fetch('/api/Tile/Providers').then(e =>
   e.json().then(c => {
     console.log(c);
     mapboxgl.accessToken =
-      'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA';
+      'pk.eyJ1IjoiZXhhbXBsZXMiLCJhIjoiY2p0MG01MXRqMW45cjQzb2R6b2ptc3J4MSJ9.zA2W0IkI0c6KaAhJfk9bWg';
     map = new mapboxgl.Map({
       container: 'main-map', // container id
       style: '/mapstyles/Mapbox.json',
