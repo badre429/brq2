@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +31,7 @@ namespace GeoMapDownloader
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
             });
-        
+
             services.AddResponseCompression();
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -54,6 +56,27 @@ namespace GeoMapDownloader
             app.UseResponseCompression();
             // app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            // Set up custom content types - associating file extension to MIME type
+            var provider = new FileExtensionContentTypeProvider();
+            // Add new mappings
+            provider.Mappings[".myapp"] = "application/x-msdownload";
+            provider.Mappings[".sqlite"] = "application/sqlite";
+            provider.Mappings[".exe"] = "application/exe";
+            provider.Mappings[".htm3"] = "text/html";
+            provider.Mappings[".image"] = "image/png";
+            provider.Mappings[".woff"] = "application/exe";
+            provider.Mappings[".rar"] = "application/rar";
+            provider.Mappings[".rtf"] = "application/x-msdownload";
+
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")), 
+                    ContentTypeProvider = provider
+            });
+
 
             app.UseCookiePolicy();
 

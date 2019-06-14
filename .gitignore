@@ -1,5 +1,5 @@
 bin
 obj
 node_modules
-wwwroot/data.mp3
+wwwroot/data.sqlite
 wwwroot/tfs

@@ -23,6 +23,10 @@ namespace GeoMapDownloader
                     webBuilder.UseStartup<Startup>().UseKestrel((context, options) =>
                      {
                          var port = Environment.GetEnvironmentVariable("PORT");
+                         if (string.IsNullOrWhiteSpace(port))
+                         {
+                             port = "5000";
+                         }
                          if (!string.IsNullOrEmpty(port))
                          {
                              options.ListenAnyIP(int.Parse(port));

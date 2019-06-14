@@ -22,7 +22,7 @@ namespace GeoMapDownloader
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlite("Datasource=wwwroot/data.mp3");
+                optionsBuilder.UseSqlite("Datasource=wwwroot/data.sqlite");
             }
         }
 
