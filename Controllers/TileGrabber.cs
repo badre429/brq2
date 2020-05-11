@@ -70,16 +70,20 @@ namespace GeoMapDownloader
         {
             _HttpFactory = _httpFactory;
             CreateProvider("OSM", "https://a.tile.openstreetmap.org/{zoom}/{x}/{y}.png", 1200);
-            CreateProvider("OSM Cycle", "https://a.tile.thunderforest.com/cycle/{zoom}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38", 1201);
-            CreateProvider("OSM Transport", "https://a.tile.thunderforest.com/transport/{zoom}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38", 1202);
-            CreateProvider("OSM Humanitaire", "https://tile-b.openstreetmap.fr/hot/{zoom}/{x}/{y}.png", 1203);
-            CreateProvider("Open Topo Map", "https://b.tile.opentopomap.org/{zoom}/{x}/{y}.png", 1204);
-            // h = roads only
             CreateProvider("Google Standard Roadmap", "https://www.google.com/maps/vt?lyrs=m@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1300);
+            CreateProvider("OSM Cycle", "https://a.tile.thunderforest.com/cycle/{zoom}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38", 1201);
+            CreateProvider("ESRI Topo", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{zoom}/{y}/{x}", 2200);
+            CreateProvider("Open Topo Map", "https://b.tile.opentopomap.org/{zoom}/{x}/{y}.png", 1204);
             CreateProvider("Google Terrain", "https://www.google.com/maps/vt?lyrs=p@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1400);
-            CreateProvider("Google Terrain Only", "https://www.google.com/maps/vt?lyrs=t@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1500);
+            CreateProvider("ESRI Imagery/Satellite", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{zoom}/{y}/{x}", 2400);
             CreateProvider("Google Satellite Only", "https://www.google.com/maps/vt?lyrs=s@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1600);
             CreateProvider("Google Hybrid", "https://www.google.com/maps/vt?lyrs=y@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1700);
+            CreateProvider("BING Imagery/Satellite", "http://ecn.dynamic.t3.tiles.virtualearth.net/comp/CompositionHandler/", 3900, "raster", "raster", (long x, long y, long zoom, string key, string culture) => BingTile((int)x, (int)y, (int)zoom, key, culture));
+
+            CreateProvider("OSM Transport", "https://a.tile.thunderforest.com/transport/{zoom}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38", 1202);
+            CreateProvider("OSM Humanitaire", "https://tile-b.openstreetmap.fr/hot/{zoom}/{x}/{y}.png", 1203);
+            // h = roads only
+            CreateProvider("Google Terrain Only", "https://www.google.com/maps/vt?lyrs=t@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1500);
             TileProvider tileProvider = CreateProvider("Mapbox", " https://api.mapbox.com/v4/mapbox.mapbox-terrain-v2,mapbox.mapbox-streets-v7/{zoom}/{x}/{y}.vector.pbf?access_token={ApiKey}", 1800, "vector", "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA");
             tileProvider.Layers.Add(new TileLayer
             {
@@ -92,16 +96,19 @@ namespace GeoMapDownloader
                 layer.Mime = "application/x-protobuf";
             }
 
-            CreateProvider("Esri Topo", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{zoom}/{y}/{x}", 2200);
-            CreateProvider("Esri Streets", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{zoom}/{y}/{x}", 2300);
-
-            CreateProvider("Esri Imagery/Satellite", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{zoom}/{y}/{x}", 2400);
+            CreateProvider("ESRI National Geographic", "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{zoom}/{y}/{x}", 2250);
+            CreateProvider("ESRI Physical", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{zoom}/{y}/{x}", 2260);
+            CreateProvider("ESRI Terrain", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{zoom}/{y}/{x}", 2270);
+            CreateProvider("ESRI Transportation", "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{zoom}/{y}/{x}", 2290);
+            CreateProvider("ESRI Streets", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{zoom}/{y}/{x}", 2300);
             CreateProvider("Yandex Imagery/Satellite", "http://sat04.maps.yandex.net/tiles?l=sat&x={x}&y={y}&z={zoom}", 2500);
             CreateProvider("MAPBOX Imagery/Satellite", "https://api.mapbox.com/v4/mapbox.satellite/{zoom}/{x}/{y}.png?access_token={ApiKey}", 3700, "raster", "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA");
 
-            CreateProvider("BING Imagery/Satellite", "http://ecn.dynamic.t3.tiles.virtualearth.net/comp/CompositionHandler/", 3900, "raster", "raster", (long x, long y, long zoom, string key, string culture) => BingTile((int)x, (int)y, (int)zoom, key, culture));
+            CreateProvider("Wikimapia", "http://ecn.dynamic.t3.tiles.virtualearth.net/comp/CompositionHandler/", 4800, "raster", "raster", (long x, long y, long zoom, string key, string culture) => WikimapiaTile((int)x, (int)y, (int)zoom, key, culture));
 
-
+            CreateProvider("Carto Positron", "https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{zoom}/{x}/{y}.png", 4500);
+            CreateProvider("Stamen Terrain", "http://a.tile.stamen.com/terrain/{zoom}/{x}/{y}.png", 4600);
+            CreateProvider("Stamen Toner", "http://tile.stamen.com/toner/{zoom}/{x}/{y}.png", 4700);
             SetIdsLayerProvider();
             Db = OpenDB();
 
@@ -126,6 +133,16 @@ namespace GeoMapDownloader
             }
             var hk = quadKey.ToString();
             return "http://ecn.dynamic.t3.tiles.virtualearth.net/comp/CompositionHandler/" + hk + "?mkt=fr-fr&it=A";
+
+
+        }
+
+        public static string WikimapiaTile(int x, int y, int zoom, string key, string culture)
+        {
+            var s = "i";
+            var hash = x % 4 + (y % 4) * 4; ;
+
+            return $"http://{s}{hash}.wikimapia.org/?x={x}&y={y}&zoom={zoom}&r=7071412&type=&lng=1";
 
 
         }
