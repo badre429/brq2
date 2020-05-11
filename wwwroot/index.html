@@ -1,186 +1,173 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>MAP CLIENT</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      media="screen"
-      href="./outlib/vuetify.min.css"
-    />
 
-    <link
-      rel="stylesheet"
-      type="text/css"
-      media="screen"
-      href="./outlib/mapbox-gl.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      media="screen"
-      href="./outlib/material-design-icons.css"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      media="screen"
-      href="./outlib/mapbox-gl-draw.css"
-    />
-    <script src="./outlib/vue.min.js"></script>
-    <script src="./outlib/vuetify.min.js"></script>
-    <script src="./outlib/mapbox-gl.js"></script>
-    <script src="./outlib/mapbox-gl-draw.js"></script>
-    <style>
-      html,
-      body,
-      #main-div {
-        height: 100%;
-        padding: 0;
-        margin: 0;
-        width: 100%;
-      }
-      #main-map {
-        height: 100%;
-        width: 70%;
-      }
-      #main-div {
-        height: 100%;
-        display: flex;
-        flex-direction: row;
-      }
-      #main-toolbar {
-        background: white;
-        height: 100%;
-        width: 30%;
-        padding: 5px;
-      }
-      #select-rect {
-        position: fixed;
-        top: 15px;
-        z-index: 555555;
-        left: 20px;
-        width: 0px;
-        height: 0px;
-        background: #0000ff39;
-        border: solid 2px #0000ff80;
-      }
-      .control {
-        width: 98%;
-      }
-      .push-c {
-        margin-top: 5px;
-        margin-bottom: 5px;
-        margin-left: 0;
-        margin-right: 0;
-      }
-      .v-text-field__details {
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="select-rect" style="display: none;"></div>
-    <div id="main-div">
-      <div id="main-toolbar">
-        <v-snackbar v-model="cancelMessage" color="success">
-          Download Canceled
-          <v-btn dark flat @click="cancelMessage = false">
-            Close
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>MAP CLIENT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" type="text/css" media="screen" href="./outlib/vuetify.min.css" />
+
+  <link rel="stylesheet" type="text/css" media="screen" href="./outlib/mapbox-gl.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="./outlib/material-design-icons.css" />
+  <link rel="stylesheet" type="text/css" media="screen" href="./outlib/mapbox-gl-draw.css" />
+  <script src="./outlib/vue.min.js"></script>
+  <script src="./outlib/vuetify.min.js"></script>
+  <script src="./outlib/mapbox-gl.js"></script>
+  <script src="./outlib/mapbox-gl-draw.js"></script>
+  <script src="./outlib/turf.min.js"></script>
+  <style>
+    html,
+    body,
+    #main-div {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+
+    #main-map {
+      height: 100%;
+      width: 70%;
+    }
+
+    #main-div {
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+    }
+
+    #main-toolbar {
+      background: white;
+      height: 100%;
+      width: 30%;
+      padding: 5px;
+    }
+
+    #select-rect {
+      position: fixed;
+      top: 15px;
+      z-index: 555555;
+      left: 20px;
+      width: 0px;
+      height: 0px;
+      background: #0000ff39;
+      border: solid 2px #0000ff80;
+    }
+
+    .control {
+      width: 98%;
+    }
+
+    .push-c {
+      margin-top: 5px;
+      margin-bottom: 5px;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    .v-text-field__details {
+      display: none;
+    }
+
+    .calculation-box {
+      height: 75px;
+      width: 150px;
+      position: absolute;
+      bottom: 40px;
+      left: 10px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="select-rect" style="display: none;"></div>
+  <div id="main-div">
+    <div class="calculation-box">
+
+      <div id="calculated-area"></div>
+    </div>
+    <div id="main-toolbar">
+      <v-app>
+        <v-content>
+          <v-btn v-on:click="DrawPointsLayer" class="push-c control">Afficher les points</v-btn>
+          <v-snackbar v-model="cancelMessage" color="success">
+            Download Canceled
+            <v-btn dark flat @click="cancelMessage = false">
+              Close
+            </v-btn>
+          </v-snackbar>
+          <v-snackbar v-model="startedMessage" color="success">
+            Download Stared
+            <v-btn dark flat @click="startedMessage = false">
+              Close
+            </v-btn>
+          </v-snackbar>
+
+
+          <v-select v-model="layer" item-text="name" item-value="name" v-on:change="layerChanged" :items="items"
+            label="Box style">
+          </v-select>
+          <v-btn v-if="selection==false&&!serverDownloading" v-on:click="startSelection" class="push-c control">select
+            region</v-btn>
+          <v-btn v-if="selection&&!serverDownloading" v-on:click="endSelection" class="push-c control">end selection
           </v-btn>
-        </v-snackbar>
-        <v-snackbar v-model="startedMessage" color="success">
-          Download Stared
-          <v-btn dark flat @click="startedMessage = false">
-            Close
-          </v-btn>
-        </v-snackbar>
-        <v-select
-          :items="items"
-          v-model="layer"
-          item-text="name"
-          v-on:change="layerChanged"
-          box
-          label="Box style"
-        ></v-select>
-        <v-btn
-          v-if="selection==false&&!serverDownloading"
-          v-on:click="startSelection"
-          class="push-c control"
-          >select region</v-btn
-        >
-        <v-btn
-          v-if="selection&&!serverDownloading"
-          v-on:click="endSelection"
-          class="push-c control"
-          >end selection</v-btn
-        >
 
-        <div v-if="regionSelected&&!serverDownloading">
-          <v-text-field
-            label="c1.lng"
-            type="number"
-            v-model="rect.c1.lng"
-            v-on:change="updateSelectedLayer"
-            outline
-          ></v-text-field>
+          <div v-if="regionSelected&&!serverDownloading">
+            <v-text-field label="c1.lng" type="number" v-model="rect.c1.lng" v-on:change="updateSelectedLayer" outline>
+            </v-text-field>
 
-          <v-text-field
-            label="c1.lat"
-            type="number"
-            v-model="rect.c1.lat"
-            v-on:change="updateSelectedLayer"
-            outline
-          ></v-text-field>
+            <v-text-field label="c1.lat" type="number" v-model="rect.c1.lat" v-on:change="updateSelectedLayer" outline>
+            </v-text-field>
 
-          <v-text-field
-            label="c2.lng"
-            type="number"
-            v-model="rect.c2.lng"
-            v-on:change="updateSelectedLayer"
-            outline
-          ></v-text-field>
+            <v-text-field label="c2.lng" type="number" v-model="rect.c2.lng" v-on:change="updateSelectedLayer" outline>
+            </v-text-field>
 
-          <v-text-field
-            label="c2.lat"
-            type="number"
-            v-model="rect.c2.lat"
-            v-on:change="updateSelectedLayer"
-            outline
-          ></v-text-field>
-          <div>
-            ({{ rect.c1.lng }},{{ rect.c1.lat }})/({{ rect.c2.lng }},{{
+            <v-text-field label="c2.lat" type="number" v-model="rect.c2.lat" v-on:change="updateSelectedLayer" outline>
+            </v-text-field>
+            <div>
+              ({{ rect.c1.lng }},{{ rect.c1.lat }})/({{ rect.c2.lng }},{{
               rect.c2.lat
             }})
+            </div>
+            <v-btn v-if="selection" v-on:click="startDownloading" class="push-c control">Sart downloading</v-btn>
+
+
           </div>
-          <v-btn
-            v-if="selection"
-            v-on:click="startDownloading"
-            class="push-c control"
-            >Sart downloading</v-btn
-          >
-        </div>
-        <div v-if="serverDownloading">
-          <v-btn v-on:click="stopDownloading" class="push-c control"
-            >stop downloading</v-btn
-          >
-          <table v-if="serverDownloading" class="v-datatable v-table ">
-            <tbody>
-              <tr>
-                <td><h3>Server State</h3></td>
-                <td>Zoom:{{ serverStat.zoom }}</td>
-                <td>Down:{{ serverStat.count }}</td>
-                <td>Total:{{ serverStat.total }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div id="main-map"></div>
+          <v-btn v-if="!serverDownloading&&layer" v-on:click="startDownloadingPoints" class="push-c control">Sart
+            downloading Points</v-btn>
+          <div v-if="serverDownloading">
+            <v-btn v-on:click="stopDownloading" class="push-c control">stop downloading</v-btn>
+            <table v-if="serverDownloading" class="v-datatable v-table ">
+              <tbody>
+                <tr>
+                  <td>
+                    <h3>Server State</h3>
+                  </td>
+                  <td>Zoom:{{ serverStat.zoom }}</td>
+                  <td>Down:{{ serverStat.count }}</td>
+                  <td>Total:{{ serverStat.total }}</td>
+                </tr>
+
+                <tr v-if="serverStat.pointCount">
+                  <td>
+                    <h3>Points:</h3>
+                  </td>
+                  <td colspan="3"> ({{serverStat.currentPoint}}/{{serverStat.pointCount}})</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </v-content>
+      </v-app>
     </div>
-    <script src="./index.js"></script>
-  </body>
+    <div id="main-map"></div>
+  </div>
+  <script src="./index.js"></script>
+</body>
+
 </html>
