@@ -1,10 +1,28 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json.Serialization;
+
 namespace GeoMapDownloader
 {
     // GeoMapDownloader.CacheUrl
     public class DownloadStats
     {
+
+        [JsonIgnore]
+        public PointDto[] Points { get; set; }
+        public int PointCount
+        {
+            get
+            {
+                if (Points != null) return Points.Count();
+                return 0;
+            }
+        }
+        public int CurrentPoint { get; set; }
+
         public int Zoom { get; set; }
         public bool IsActive { get; set; } = false;
+        public double Delta { get; set; } = 0.12;
         public long Count { get; set; }
         public long Total { get; set; }
         public long StatrtX { get; set; }

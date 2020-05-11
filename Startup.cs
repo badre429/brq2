@@ -73,8 +73,8 @@ namespace GeoMapDownloader
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")), 
-                    ContentTypeProvider = provider
+                    Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+                ContentTypeProvider = provider
             });
 
 
@@ -85,15 +85,17 @@ namespace GeoMapDownloader
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
+           {
+               endpoints.MapControllerRoute(
+                   name: "default",
+                   pattern: "{controller=Home}/{action=Index}/{id?}");
+           });
+            Task.Run(() =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapRazorPages();
-            });
 
-            var db = new TilesDbContext();
-            db.Database.Migrate();
+                var db = new TilesDbContext();
+                db.Database.Migrate();
+            });
         }
     }
 }

@@ -6,7 +6,7 @@ namespace GeoMapDownloader
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Text.Json.Serialization;
+    using System.Text.Json;
 
     public class CacheUrl
     {
@@ -39,7 +39,7 @@ namespace GeoMapDownloader
                 {
                     if (!string.IsNullOrEmpty(_Headers))
                     {
-                        this._headers = JsonSerializer.Parse<Dictionary<string, string>>(_Headers);// JsonConvert.DeserializeObject<Dictionary<string, string>>(_Headers);
+                        this._headers = JsonSerializer.Deserialize<Dictionary<string, string>>(_Headers);// JsonConvert.DeserializeObject<Dictionary<string, string>>(_Headers);
                     }
                     else
                     {
@@ -50,7 +50,7 @@ namespace GeoMapDownloader
             }
             set
             {
-                this._Headers = JsonSerializer.ToString<Dictionary<string, string>>(value);
+                this._Headers = JsonSerializer.Serialize<Dictionary<string, string>>(value);
                 _headers = value;
             }
         }

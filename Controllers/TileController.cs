@@ -44,18 +44,18 @@ namespace GeoMapDownloader
         [HttpGet()]
         public ActionResult<IEnumerable<TileProviderDto>> Providers([FromServices]TileGrabber grabber)
         {
-            var ret = grabber.GetProviders().ToList();
-            return Ok(ret);
+
+            return Ok(grabber.GetProviders().ToList());
         }
 
         [HttpPost()]
         public ActionResult<RectDto> StartDownloading([FromServices]TileGrabber grabber, [FromBody]RectDto rect)
         {
-            lock (grabber.DownloadParams)
+            lock (TileGrabber.DownloadParams)
             {
-                if (grabber.DownloadParams.IsActive == false)
+                if (TileGrabber.DownloadParams.IsActive == false)
                 {
-                    grabber.DownloadParams.IsActive = true;
+                    TileGrabber.DownloadParams.IsActive = true;
                     grabber.StartDownloading(rect);
                 }
             }
@@ -65,16 +65,16 @@ namespace GeoMapDownloader
         [HttpGet()]
         public ActionResult<DownloadStats> DownloadState([FromServices]TileGrabber grabber)
         {
-            return Ok(grabber.DownloadParams);
+            return Ok(TileGrabber.DownloadParams);
         }
         [HttpGet()]
         public ActionResult<DownloadStats> DownloadCancel([FromServices]TileGrabber grabber)
         {
-            lock (grabber.DownloadParams)
+            lock (TileGrabber.DownloadParams)
             {
-                grabber.DownloadParams.IsActive = false;
+                TileGrabber.DownloadParams.IsActive = false;
             }
-            return Ok(grabber.DownloadParams);
+            return Ok(TileGrabber.DownloadParams);
         }
 
         [HttpGet("/cache-url/{*url}")]

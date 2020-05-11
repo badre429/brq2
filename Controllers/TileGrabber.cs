@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Async;
+using Dasync.Collections;
 namespace GeoMapDownloader
 {
 
@@ -13,8 +13,11 @@ namespace GeoMapDownloader
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Security.Cryptography;
+    using System.Text;
     using Dapper;
     using Microsoft.Data.Sqlite;
+    using Microsoft.Extensions.Configuration;
+
     public class SaveItem
     {
         public Tiles Tile { get; set; }
@@ -28,7 +31,7 @@ namespace GeoMapDownloader
     {
         public static ConcurrentStack<SaveItem> SaveStack { get; set; } = new ConcurrentStack<SaveItem>();
         public TilesDbContext Db { get; set; }
-        public DownloadStats DownloadParams { get; set; } = new DownloadStats();
+        public static DownloadStats DownloadParams { get; set; } = new DownloadStats();
         public Dictionary<int, TileProvider> Providers { get; set; } = new Dictionary<int, TileProvider>();
 
         public Dictionary<int, Tuple<int, int>> IdsLayerProvider { get; set; } = new Dictionary<int, Tuple<int, int>>();
@@ -63,10 +66,14 @@ namespace GeoMapDownloader
 
         }
 
-        public TileGrabber(System.Net.Http.IHttpClientFactory _httpFactory)
+        public TileGrabber(System.Net.Http.IHttpClientFactory _httpFactory, IConfiguration configuration)
         {
             _HttpFactory = _httpFactory;
-            CreateProvider("Openstreetmap", "https://a.tile.openstreetmap.org/{zoom}/{x}/{y}.png", 1200);
+            CreateProvider("OSM", "https://a.tile.openstreetmap.org/{zoom}/{x}/{y}.png", 1200);
+            CreateProvider("OSM Cycle", "https://a.tile.thunderforest.com/cycle/{zoom}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38", 1201);
+            CreateProvider("OSM Transport", "https://a.tile.thunderforest.com/transport/{zoom}/{x}/{y}@2x.png?apikey=6170aad10dfd42a38d4d8c709a536f38", 1202);
+            CreateProvider("OSM Humanitaire", "https://tile-b.openstreetmap.fr/hot/{zoom}/{x}/{y}.png", 1203);
+            CreateProvider("Open Topo Map", "https://b.tile.opentopomap.org/{zoom}/{x}/{y}.png", 1204);
             // h = roads only
             CreateProvider("Google Standard Roadmap", "https://www.google.com/maps/vt?lyrs=m@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1300);
             CreateProvider("Google Terrain", "https://www.google.com/maps/vt?lyrs=p@256&gl=fr&x={x}&y={y}&z={zoom}&hl=fr", 1400);
@@ -90,13 +97,36 @@ namespace GeoMapDownloader
 
             CreateProvider("Esri Imagery/Satellite", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{zoom}/{y}/{x}", 2400);
             CreateProvider("Yandex Imagery/Satellite", "http://sat04.maps.yandex.net/tiles?l=sat&x={x}&y={y}&z={zoom}", 2500);
-            CreateProvider("BING Imagery/Satellite", "http://ecn.t3.tiles.virtualearth.net/tiles/a{q}.jpeg?g=0&dir=dir_n", 2600);
-            CreateProvider("MAPBOX Imagery/Satellite", "https://api.mapbox.com/v4/mapbox.satellite/{zoom}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA", 3700);
+            CreateProvider("MAPBOX Imagery/Satellite", "https://api.mapbox.com/v4/mapbox.satellite/{zoom}/{x}/{y}.png?access_token={ApiKey}", 3700, "raster", "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA");
 
+            CreateProvider("BING Imagery/Satellite", "http://ecn.dynamic.t3.tiles.virtualearth.net/comp/CompositionHandler/", 3900, "raster", "raster", (long x, long y, long zoom, string key, string culture) => BingTile((int)x, (int)y, (int)zoom, key, culture));
 
 
             SetIdsLayerProvider();
             Db = OpenDB();
+
+        }
+        public static string BingTile(int x, int y, int zoom, string key, string culture)
+        {
+            StringBuilder quadKey = new StringBuilder();
+            for (int i = zoom; i > 0; i--)
+            {
+                char digit = '0';
+                int mask = 1 << (i - 1);
+                if ((x & mask) != 0)
+                {
+                    digit++;
+                }
+                if ((y & mask) != 0)
+                {
+                    digit++;
+                    digit++;
+                }
+                quadKey.Append(digit);
+            }
+            var hk = quadKey.ToString();
+            return "http://ecn.dynamic.t3.tiles.virtualearth.net/comp/CompositionHandler/" + hk + "?mkt=fr-fr&it=A";
+
 
         }
         public (int provider, int layer) GetTileLayerId(int layerId = 0)
@@ -133,6 +163,12 @@ namespace GeoMapDownloader
                 var httpdata = await prv.GetTile(x, y, zoom, layer);
                 retdata = httpdata.data;
                 SaveTileToDb(x, y, zoom, typeId, ref r.inofmration, ref r.data, retdata);
+
+                while (SaveStack.Count > 10000)
+                {
+                    SaveToDb(null);
+                    await Task.Delay(2000);
+                }
             }
             else
             {
@@ -142,7 +178,7 @@ namespace GeoMapDownloader
 
         }
 
-        public TileProvider CreateProvider(string name, string url, int id, string type = "raster", string apikey = "")
+        public TileProvider CreateProvider(string name, string url, int id, string type = "raster", string apikey = "", Func<long, long, long, string, string, string> func = null)
         {
             TileProvider tileProvider = new TileProvider(_HttpFactory);
             tileProvider.Name = name;
@@ -151,8 +187,10 @@ namespace GeoMapDownloader
             tileProvider.Type = type;
             tileProvider.ApiKey = apikey;
             tileProvider.Type = type;
+            tileProvider.CreateUrlFunction = func;
             tileProvider.InitLayer(type);
             Providers[id] = tileProvider;
+
             return tileProvider;
         }
 
@@ -317,6 +355,7 @@ namespace GeoMapDownloader
                 }
             }
             SaveToDb(saveItem);
+
             return tileInfo.Id;
         }
 
@@ -327,6 +366,7 @@ namespace GeoMapDownloader
             DownloadParams.StartZoom = rect.StartZoom;
             DownloadParams.EndZoom = rect.EndZoom;
             DownloadParams.ProviderId = rect.ProviderId;
+            DownloadParams.Points = rect.Points;
             if (IdsLayerProvider.ContainsKey(rect.ProviderId))
             {
                 var prid = IdsLayerProvider[rect.ProviderId].Item1;
@@ -408,10 +448,10 @@ namespace GeoMapDownloader
                      try
                      {
                          int itemCount = Math.Min(SaveStack.Count, maxItemCount);
-                        //  if (itemCount > 1)
-                        //  {
-                        //      System.Console.WriteLine($"save tiles:{itemCount}");
-                        //  }
+                         if (itemCount > 50)
+                         {
+                             System.Console.WriteLine($"save tiles:{itemCount}");
+                         }
                          var db = new TilesDbContext();
                          SaveItem[] arr = new SaveItem[itemCount];
                          if (SaveStack.TryPopRange(arr) > 0)
@@ -493,7 +533,16 @@ namespace GeoMapDownloader
         }
         public async Task DownloadWorker()
         {
+        global:
             long count = 0;
+            if (DownloadParams.PointCount > 0)
+            {
+                DownloadParams.Zoom = DownloadParams.StartZoom;
+                DownloadParams.StartLat = DownloadParams.Points[DownloadParams.CurrentPoint].Lat + DownloadParams.Delta;
+                DownloadParams.EndLat = DownloadParams.Points[DownloadParams.CurrentPoint].Lat - DownloadParams.Delta;
+                DownloadParams.StartLng = DownloadParams.Points[DownloadParams.CurrentPoint].Lng - DownloadParams.Delta;
+                DownloadParams.EndLng = DownloadParams.Points[DownloadParams.CurrentPoint].Lng + DownloadParams.Delta;
+            }
             for (int currentZoom = DownloadParams.StartZoom; currentZoom <= DownloadParams.EndZoom; currentZoom++)
             {
                 if (DownloadParams.IsActive == false)
@@ -527,8 +576,8 @@ namespace GeoMapDownloader
                     {
                         if (!set.Contains(i)) lst.Add(i);
                     }
-
-                    this.DownloadParams.Count = Interlocked.Add(ref count, set.Count);
+                    var defCount = TotalY - lst.Count;
+                    DownloadParams.Count = Math.Max(DownloadParams.Count, Interlocked.Add(ref count, defCount));
                     await lst.ParallelForEachAsync(async (y) =>
                     // var v = Parallel.For(0, TotalY, new ParallelOptions { MaxDegreeOfParallelism = 8 }, async (y, Loop) =>
                     //  for (int y = 0; y < TotalY; y++)
@@ -549,9 +598,9 @@ namespace GeoMapDownloader
                             };
                         }
                         // Interlocked.Add(ref count, 1);
-                        this.DownloadParams.Count = Interlocked.Add(ref count, 1);
+                        DownloadParams.Count = Math.Max(DownloadParams.Count, Interlocked.Add(ref count, 1));
                     }
-                    , 64
+                    , 128
                     );
                     while (SaveStack.Count > 0)
                     {
@@ -562,9 +611,14 @@ namespace GeoMapDownloader
                 }
 
             }
-            lock (this.DownloadParams)
+            DownloadParams.CurrentPoint++;
+            if (DownloadParams.CurrentPoint < DownloadParams.PointCount)
             {
-                this.DownloadParams.IsActive = false;
+                goto global;
+            }
+            lock (DownloadParams)
+            {
+                DownloadParams.IsActive = false;
             }
         }
 

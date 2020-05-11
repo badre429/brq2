@@ -18,6 +18,7 @@ namespace GeoMapDownloader
         public string Name { get; set; }
         public string Type { get; set; } = "raster";
         public string Culture { get; set; } = "";
+        public Func<long, long, long, string, string, string> CreateUrlFunction { get; set; }
 
         public virtual List<TileLayer> Layers { get; set; }
         public virtual bool HasKey { get; set; } = false;
@@ -65,14 +66,9 @@ namespace GeoMapDownloader
                 }
                 catch (System.Exception)
                 {
-                    try
-                    {
-                        return await DownloadTile(layer, url);
-                    }
-                    catch (System.Exception)
-                    {
-                        return await DownloadTile(layer, url);
-                    }
+
+                    return await DownloadTile(layer, url);
+
                 }
             }
         }
@@ -82,22 +78,8 @@ namespace GeoMapDownloader
             var client = _HttpFactory.CreateClient("tile");
             client.DefaultRequestHeaders.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36");
             HttpResponseMessage response = null;
-            int i = 0;
-            while (i++ < 5)
-            {
-                try
-                {
-                    // System.Console.WriteLine("start down");
-                    response = await client.GetAsync(url);
-                    // System.Console.WriteLine("end  down");
-                    i = 100;
-                }
-                catch (System.Exception)
-                {
-                    await Task.Delay(5000);
-                    i++;
-                }
-            }
+
+            response = await client.GetAsync(url);
             var ret = await response.Content.ReadAsByteArrayAsync();
             if (response.IsSuccessStatusCode != true || ret == null || ret.Length == 0)
             {
@@ -108,6 +90,10 @@ namespace GeoMapDownloader
 
         protected string TileUrl(long x, long y, long zoom, TileLayer layer)
         {
+            if (this.CreateUrlFunction != null)
+            {
+                return this.CreateUrlFunction(x, y, zoom, ApiKey, Culture);
+            }
             var url = layer.FormatUrl
             .Replace("{x}", x.ToString())
             .Replace("{y}", y.ToString())
